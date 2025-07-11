@@ -1,16 +1,23 @@
 FROM ghcr.io/actions/actions-runner:2.326.0
 # for latest release, see https://github.com/actions/runner/releases
 
+# rootユーザーに切り替えてパッケージをインストール
 USER root
 
-# install curl and jq
-RUN apt-get update && apt-get install -y curl jq && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+# 必要なパッケージをまとめてインストール
+# jqはすでに含まれていたため、fonts-takaoとxvfbを追加
+RUN apt-get update && apt-get install -y \
+    curl \
+    jq \
+    fonts-takao \
+    xvfb \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY github-actions-runner/entrypoint.sh ./entrypoint.sh
 RUN chmod +x ./entrypoint.sh
 
+# セキュリティのため、非特権ユーザーに戻す
 USER runner
 
 ENTRYPOINT ["./entrypoint.sh"]
